@@ -4,37 +4,38 @@ const bcrypt = require('bcryptjs');
 const Event = require('../models/event');
 const User = require('../models/user');
 
-const getEventsByIds = eventIds => {
-    return Event.find({_id: {$in:  eventIds}}).then(events => {
-        return events.map(event => {
-            return {
-                ...event._doc,
-                date: new Date(event.date).toISOString(),
-                creator: getUser.bind(this, event.creator) 
-            };
-        });
-    });
-}
-const getUser = userId => {
-    return User.findById(userId).then(user => {
+const getEventsByIds = async eventIds => {
+    const events = await Event.find({_id: {$in:  eventIds}});
+    events.map(event => {
         return {
-            ...user._doc,
-            createdEvents: getEventsByIds.bind(this, user.createdEvents)
+            ...event._doc,
+            date: new Date(event._doc.date).toISOString(),
+            creator: getUser.bind(this, event.creator) 
         };
     });
+    return events;
+}
+const getUser = async userId => {
+    const user = await User.findById(userId);
+    return {
+        ...user._doc,
+        createdEvents: getEventsByIds.bind(this, user._doc.createdEvents)
+    };
 }
 
 module.exports = {
-    events: () => {
-        return Event.find().then(events => {
-            return events.map(event => {
-                console.log(event._doc)
-                return { ...event._doc, date: new Date(event.date).toISOString(), creator: getUser.bind(this, event.creator) }
-            });
+    events: async () => {
+        const events = await Event.find();
+        return events.map(event => {
+            console.log(event)
+            return { 
+                ...event._doc, 
+                date: new Date(event.date).toISOString(), 
+                creator: getUser.bind(this, event.creator) 
+            }
         });
     },
-    createEvent: args => {
-        let createEvent;
+    createEvent: async args => {
         const event = new Event({
             title: args.eventInput.title,
             description: args.eventInput.description,
@@ -42,49 +43,44 @@ module.exports = {
             date: args.eventInput.date,
             creator: '5dc32bbe48fd24578284f62e'
         });
-        return event.save().then(event => {
-            createEvent = { 
-                ...event._doc,
-                date: new Date(event.date).toISOString(),
-                creator: getUser.bind(this, event.creator)
+        let createEvent;
+        try {
+            const result = await event.save();
+            createEvent = {
+                ...result,
+                date: new Date(result.date).toISOString(),
+                creator: getUser.bind(this, result.creator)
             }
-            return User.findById('5dc32bbe48fd24578284f62e')
-        })
-        .then(user => {
+            const user = await User.findById('5dc32bbe48fd24578284f62e');
             if (!user) {
                 throw new Error('User not found!')
             }
             user.createdEvents.push(event);
-            return user.save()
-        })
-        .then(() => {
+            await user.save();
             return createEvent;
-        })
-        .catch(err => {
-            throw err
-        });
+        } catch (err) {
+            throw err;
+        }
     },
-    createUser: args => {
-        return User.findOne({email: args.userInput.email} || {username: args.userInput.username}).then(user => {
+    createUser: async args => {
+        try {
+            let userResult = await User.findOne({email: args.userInput.email} || {username: args.userInput.username});
             if (user) {
                 throw new Error('User exists already!');
             }
-            return bcrypt.hash(args.userInput.password, 12);
-        })
-        .then(hashedPwd => {
+            const hashedPwd = await bcrypt.hash(args.userInput.password, 12);
             const user = new User({
                 username: args.userInput.username,
                 email: args.userInput.email,
                 password: hashedPwd
             });
-            return user.save();
-        })
-        .then(user => {
-            console.log(user);
-            return { ...user._doc, password: null }
-        })
-        .catch(err => {
-            throw err
-        });
+            userResult = await user.save();
+            return { 
+                ...userResult._doc, 
+                password: null 
+            }
+        } catch (err) {
+            throw err;
+        }
     }
 }
