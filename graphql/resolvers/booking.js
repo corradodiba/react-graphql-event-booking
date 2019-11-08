@@ -6,6 +6,7 @@ const {
     getUserById, 
     customizeEvent 
 } = require('../helpers/merge');
+const { isAuth } = require ('../helpers/auth-error-handler');
 
 const customizeBooking = booking => {
     return {
@@ -19,21 +20,24 @@ const customizeBooking = booking => {
 
 module.exports = {
     bookings: async () => {
+        isAuth(req.isAuth);
         const bookings = await Booking.find();
         return bookings.map(booking => {
             return customizeBooking(booking);
         });
     },
     bookEvent: async args => {
+        isAuth(req.isAuth);
         const fetchedEvent = await Event.findOne({ _id: args.eventId });
         const booking = new Booking({
             event: fetchedEvent,
-            user: '5dc55e27a9f2c18584d35496',
+            user: req.userId,
         });
         const result = await booking.save();
         return customizeBooking(result);
     },
     cancelBooking: async args => {
+        isAuth(req.isAuth);
         const fetchedBooking = await Booking.findById(args.bookingId).populate('event');
         const event = customizeEvent(fetchedBooking.event);
         await Booking.deleteOne({ _id: args.bookingId});

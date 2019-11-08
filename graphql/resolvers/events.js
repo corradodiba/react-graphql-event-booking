@@ -1,6 +1,7 @@
 const Event = require('../../models/event');
 const User = require('../../models/user');
 const  { customizeEvent } = require('../helpers/merge');
+const { isAuth } = require('../helpers/auth-error-handler');
 
 module.exports = {
     events: async () => {
@@ -9,19 +10,20 @@ module.exports = {
             return customizeEvent(event);
         });
     },
-    createEvent: async args => {
+    createEvent: async (args, req) => {
+        isAuth(req.isAuth);
         const event = new Event({
             title: args.eventInput.title,
             description: args.eventInput.description,
             price: args.eventInput.price,
             date: args.eventInput.date,
-            creator: '5dc55e27a9f2c18584d35496'
+            creator: req.userId
         });
         let createEvent;
         try {
             const result = await event.save();
             createEvent = customizeEvent(result);
-            const user = await User.findById('5dc55e27a9f2c18584d35496');
+            const user = await User.findById(req.userId);
             if (!user) {
                 throw new Error('User not found!')
             }
