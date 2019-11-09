@@ -3,14 +3,17 @@ const User = require('../../models/user');
 const  { customizeEvent } = require('../helpers/merge');
 const { isAuth } = require('../helpers/auth-error-handler');
 
-module.exports = {
+exports.eventsQueries = {
     events: async () => {
         const events = await Event.find();
         return events.map(event => {
             return customizeEvent(event);
         });
-    },
-    createEvent: async (args, req) => {
+    }
+}
+    
+exports.eventsMutations = {
+    createEvent: async ( _, args, req ) => {
         isAuth(req.isAuth);
         const event = new Event({
             title: args.eventInput.title,

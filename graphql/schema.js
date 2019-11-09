@@ -1,67 +1,64 @@
+module.exports = `
 
-const { buildSchema } = require('graphql');
+    type AuthData {
+        userId: ID!
+        token: String!
+        dateExpiration: Int!
+    }
 
-module.exports = buildSchema(`
+    type Booking {
+        _id: ID!,
+        event: Event!,
+        user: User,
+        createdAt: String!,
+        updatedAt: String!
+    }
 
-type AuthData {
-    userId: ID!
-    token: String!
-    dateExpiration: Int!
-}
+    type Event {
+        _id: ID!
+        title: String!
+        description: String!
+        price: Float!
+        date: String!
+        creator: User!
+    }
 
-type Booking {
-    _id: ID!,
-    event: Event!,
-    user: User,
-    createdAt: String!,
-    updatedAt: String!
-}
+    type User {
+        _id: ID!
+        username: String!
+        email: String!
+        password: String
+        createdEvents: [Event!]
+    }
 
-type Event {
-    _id: ID!
-    title: String!
-    description: String!
-    price: Float!
-    date: String!
-    creator: User!
-}
+    input EventInput {
+        title: String!
+        description: String!
+        price: Float!
+        date: String!
+    }
 
-type User {
-    _id: ID!
-    username: String!
-    email: String!
-    password: String
-    createdEvents: [Event!]
-}
+    input UserInput {
+        username: String!
+        email: String!
+        password: String!
+    }
 
-input EventInput {
-    title: String!
-    description: String!
-    price: Float!
-    date: String!
-}
+    type rootQuery {
+        events: [Event!]!
+        bookings: [Booking!]!
+        login(email: String!, password: String!): AuthData!
+    }
 
-input UserInput {
-    username: String!
-    email: String!
-    password: String!
-}
+    type rootMutation {
+        createEvent(eventInput: EventInput): Event
+        createUser(userInput: UserInput): User
+        bookEvent(eventId: ID!): Booking!
+        cancelBooking(bookingId: ID!): Event!
+    }
 
-type rootQuery {
-    events: [Event!]!
-    bookings: [Booking!]!
-    login(email: String, password: String!): AuthData!
-}
-
-type rootMutation {
-    createEvent(eventInput: EventInput): Event
-    createUser(userInput: UserInput): User
-    bookEvent(eventId: ID!): Booking!
-    cancelBooking(bookingId: ID!): Event!
-}
-
-schema {
-    query: rootQuery
-    mutation: rootMutation
-}
-`)
+    schema {
+        query: rootQuery
+        mutation: rootMutation
+    }
+`

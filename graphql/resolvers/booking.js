@@ -18,15 +18,18 @@ const customizeBooking = booking => {
     };
 };
 
-module.exports = {
-    bookings: async () => {
+exports.bookingQueries = {
+    bookings: async (_, args, req) => {
         isAuth(req.isAuth);
         const bookings = await Booking.find();
         return bookings.map(booking => {
             return customizeBooking(booking);
         });
-    },
-    bookEvent: async args => {
+    }
+}
+
+exports.bookingMutations = {
+    bookEvent: async ( _, args, req ) => {
         isAuth(req.isAuth);
         const fetchedEvent = await Event.findOne({ _id: args.eventId });
         const booking = new Booking({
@@ -36,7 +39,7 @@ module.exports = {
         const result = await booking.save();
         return customizeBooking(result);
     },
-    cancelBooking: async args => {
+    cancelBooking: async ( _, args, req ) => {
         isAuth(req.isAuth);
         const fetchedBooking = await Booking.findById(args.bookingId).populate('event');
         const event = customizeEvent(fetchedBooking.event);

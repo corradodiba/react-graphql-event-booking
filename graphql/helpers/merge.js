@@ -27,10 +27,9 @@ exports.getEventById = async eventId => {
 
 exports.getUserById = async userId => {
     const user = await User.findById(userId);
-    console.log(user._doc.createdEvents);
     return {
         ...user._doc,
         password: null,
-        createdEvents: this.getEventsByIds.bind(this, user._doc.createdEvents)
+        createdEvents: this.getEventsByIds.bind(this, user.createdEvents)
     };
 }

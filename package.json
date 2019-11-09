@@ -1,26 +1,23 @@
 {
-  "name": "event-booking",
+  "name": "react-graphql-event-booking",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  },
   "dependencies": {
+    "apollo-server-express": "^2.9.7",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "express-graphql": "^0.9.0",
-    "graphiql": "^0.16.0",
     "graphql": "^14.5.8",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.7.8"
-  },
-  "devDependencies": {
-    "nodemon": "^1.19.4"
+    "mongoose": "^5.7.9"
   }
 }
